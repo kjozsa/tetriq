@@ -21,6 +21,8 @@ case object S extends Form((0, 0), (1, 0), (2, 0), (1, 1), (0, 2), (1, 2), (2, 2
 case object T extends Form((0, 0), (1, 0), (2, 0), (1, 1), (1, 2));
 case object O extends Form((0, 0), (1, 0), (0, 1), (1, 1));
 
+case class Score
+
 // the moving block
 class Block(val form: Form, start: Position) {
   var positions: Seq[Position] = form.position map (_ + start)
@@ -34,12 +36,27 @@ class Block(val form: Form, start: Position) {
 // occupied positions + active block
 class GameBoard(val blocks: Seq[Position], val current: Block) {
   val (sizeX, sizeY) = (10, 20)
-  def add(newBlock: Block) = new GameBoard(blocks ++ current.positions, newBlock)
+  override def toString() = currentView.map(_.toString).foldLeft("")(_ + _)
+
+  def currentView = blocks ++ current.positions
+
+  def add(newBlock: Block): Either[Score, GameBoard] = {
+    if (currentView intersect newBlock.positions isEmpty) {
+      Right(new GameBoard(currentView, newBlock))
+    } else Left(new Score)
+  }
 }
 
 object Main extends App {
   val board = new GameBoard(Seq((0, 1), (3, 3)), new Block(T, (1, 1)))
-  board.blocks map println
-  val board2 = board add new Block(T, (1, 1))
-  board.blocks map println
+  println(board)
+  println("--")
+
+  board.current.moveLeft
+  println(board)
+
+  println("--")
+  for {
+    board2 <- board add new Block(T, (10, 10)) right
+  } yield board2.blocks map println
 }
