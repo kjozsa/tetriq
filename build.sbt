@@ -17,3 +17,5 @@ scalacOptions += "-deprecation"
 
 EclipseKeys.withSource := true
 
+initialCommands in console := """import org.fsdev.tetriq._"""
+                               // |import Stage._""".stripMargin
