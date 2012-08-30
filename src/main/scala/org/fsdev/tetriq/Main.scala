@@ -21,7 +21,7 @@ case object T extends Form((0, 0), (1, 0), (2, 0), (1, 1), (1, 2));
 case object O extends Form((0, 0), (1, 0), (0, 1), (1, 1));
 
 // todo
-case class Score
+case class Score()
 
 // the moving block
 class Block(val form: Form, start: Position) {
@@ -55,7 +55,6 @@ class GameBoard(val blocks: Seq[Position], val current: Block) {
 
 object Main extends App {
   val board = new GameBoard(Seq(), new Block(O, (5, 0)))
-
   println(board)
 
   board.current.tick
