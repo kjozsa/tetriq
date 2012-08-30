@@ -1,14 +1,13 @@
 package org.fsdev.tetriq
 
 // (x, y) pairs
-class Position(val x: Int, val y: Int) {
-  override def toString = "(" + x + ", " + y + ")"
+case class Position(val x: Int, val y: Int) {
+  override def toString = "|" + x + ", " + y + "|"
   def +(pos: Position) = new Position(x + pos.x, y + pos.y)
 }
 
 object Position {
   implicit def tuple2ToPosition(tuple: Tuple2[Int, Int]) = Position(tuple._1, tuple._2)
-  def apply(x: Int, y: Int) = new Position(x, y)
 }
 
 // form of pieces
@@ -21,6 +20,7 @@ case object S extends Form((0, 0), (1, 0), (2, 0), (1, 1), (0, 2), (1, 2), (2, 2
 case object T extends Form((0, 0), (1, 0), (2, 0), (1, 1), (1, 2));
 case object O extends Form((0, 0), (1, 0), (0, 1), (1, 1));
 
+// todo
 case class Score
 
 // the moving block
@@ -29,34 +29,44 @@ class Block(val form: Form, start: Position) {
 
   override def toString = form.getClass().getSimpleName() + " at " + positions
 
+  def tick { positions = positions map (_ + (0, 1)) }
   def moveLeft { positions = positions map (_ + (-1, 0)) }
   def moveRight { positions = positions map (_ + (1, 0)) }
 }
 
 // occupied positions + active block
 class GameBoard(val blocks: Seq[Position], val current: Block) {
-  val (sizeX, sizeY) = (10, 20)
-  override def toString() = currentView.map(_.toString).foldLeft("")(_ + _)
+  val (sizeX, sizeY) = (10, 8)
+  override def toString() = (
+    for {
+      y <- 0 to sizeY;
+      x <- 0 to sizeX
+      pos = Position(x, y)
+    } yield if (view.contains(pos)) "X" else "." + (if (x == sizeX) "\n" else "")).mkString
 
-  def currentView = blocks ++ current.positions
+  def view = blocks ++ current.positions
 
   def add(newBlock: Block): Either[Score, GameBoard] = {
-    if (currentView intersect newBlock.positions isEmpty) {
-      Right(new GameBoard(currentView, newBlock))
+    if (view intersect newBlock.positions isEmpty) {
+      Right(new GameBoard(view, newBlock))
     } else Left(new Score)
   }
 }
 
 object Main extends App {
-  val board = new GameBoard(Seq((0, 1), (3, 3)), new Block(T, (1, 1)))
+  val board = new GameBoard(Seq(), new Block(O, (5, 0)))
+
   println(board)
-  println("--")
+
+  board.current.tick
+  println(board)
 
   board.current.moveLeft
   println(board)
 
-  println("--")
-  for {
-    board2 <- board add new Block(T, (10, 10)) right
-  } yield board2.blocks map println
+  board.current.tick
+  println(board)
+
+  board.current.moveLeft
+  println(board)
 }
