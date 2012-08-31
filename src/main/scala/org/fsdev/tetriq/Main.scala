@@ -10,24 +10,23 @@ object Position {
   implicit def tuple2ToPosition(tuple: Tuple2[Int, Int]) = Position(tuple._1, tuple._2)
 }
 
-// form of pieces
-abstract sealed class Form(val position: Position*)
-case object I extends Form((0, 0), (0, 1), (0, 2))
-case object J extends Form((0, 0), (0, 1), (0, 2), (-1, 2))
-case object L extends Form((0, 0), (0, 1), (0, 2), (1, 2))
-case object Z extends Form((0, 0), (1, 0), (2, 0), (1, 1), (0, 2), (1, 2), (2, 2))
-case object S extends Form((0, 0), (1, 0), (2, 0), (1, 1), (0, 2), (1, 2), (2, 2))
-case object T extends Form((0, 0), (1, 0), (2, 0), (1, 1), (1, 2));
-case object O extends Form((0, 0), (1, 0), (0, 1), (1, 1));
+abstract sealed class Tile(val position: Position*)
+case object I extends Tile((0, 0), (1, 0), (2, 0), (3, 0))
+case object J extends Tile((0, 0), (1, 0), (2, 0), (2, 1))
+case object L extends Tile((0, 0), (1, 0), (2, 0), (0, 1))
+case object O extends Tile((0, 0), (1, 0), (0, 1), (1, 1))
+case object S extends Tile((1, 0), (2, 0), (0, 1), (1, 1))
+case object T extends Tile((0, 0), (1, 0), (2, 0), (1, 1))
+case object Z extends Tile((0, 0), (1, 0), (1, 1), (2, 1))
 
 // todo
 case class Score()
 
 // the moving block
-class Block(val form: Form, start: Position) {
-  var positions: Seq[Position] = form.position map (_ + start)
+class Block(val tileForm: Tile, start: Position) {
+  var positions: Seq[Position] = tileForm.position map (_ + start)
 
-  override def toString = form.getClass().getSimpleName() + " at " + positions
+  override def toString = tileForm.getClass().getSimpleName() + " at " + positions
 
   def tick { positions = positions map (_ + (0, 1)) }
   def moveLeft { positions = positions map (_ + (-1, 0)) }
